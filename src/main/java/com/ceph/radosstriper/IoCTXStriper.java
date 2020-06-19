@@ -499,10 +499,51 @@ public class IoCTXStriper extends RadosBase implements AutoCloseable {
     }
 
     /**
-     * Asynchronously append to an object.
+     * Asynchronously read from an object.
      *
      * @param oid
-     *          The object to write to
+     *          The object to read from
+     * @param completion
+     *          The completion instructions
+     * @param buf
+     *          The buffer to read into
+     * @throws RadosException
+     */
+    public void aioRead(final String oid, final Completion completion, final byte[] buf, long offset) throws RadosException, IllegalArgumentException {
+        handleReturnCode(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return com.ceph.radosstriper.Library.rados.rados_striper_aio_read(getPointer(), oid, completion.getPointer(), buf, buf.length, offset);
+            }
+        }, "Failed AIO reading %s bytes from %s", buf.length, oid);
+    }
+
+    /**
+     * Stat an object
+     *
+     * @param oid
+     *          The name of the object
+     * @param size
+     *           The size of the object
+     * @param mtime
+     *           The mtime of the object
+     * @throws RadosException
+     */
+    public void aioStat(final String oid, final Completion completion, final LongByReference size, final LongByReference mtime) throws RadosException {
+
+        handleReturnCode(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return com.ceph.radosstriper.Library.rados.rados_striper_aio_stat(getPointer(), oid, completion.getPointer(), size, mtime);
+            }
+        }, "Failed AIO stat of %s", oid);
+    }
+
+    /**
+     * Asynchronously remove an object.
+     *
+     * @param oid
+     *          The object to remove
      * @param completion
      *          The completion instructions
      * @throws RadosException
