@@ -31,11 +31,11 @@ public interface RadosStriper extends Library {
 
     void rados_striper_destroy(Pointer striper);
 
-    int rados_set_object_layout_stripe_unit(Pointer striper, int stripe_unit);
+    int rados_striper_set_object_layout_stripe_unit(Pointer striper, int stripe_unit);
 
-    int rados_set_object_layout_stripe_count(Pointer striper, int stripe_count);
+    int rados_striper_set_object_layout_stripe_count(Pointer striper, int stripe_count);
 
-    int rados_set_object_layout_object_size(Pointer striper, int object_size);
+    int rados_striper_set_object_layout_object_size(Pointer striper, int object_size);
 
     int rados_striper_write(Pointer striper, String oid, byte[] buf, int len, long off);
 
@@ -56,5 +56,21 @@ public interface RadosStriper extends Library {
     int rados_striper_rmxattr(Pointer striper, String oid, String xattrName);
 
     int rados_striper_stat(Pointer striper, String oi, LongByReference size, LongByReference mtime);
+
+    // AIO
+
+    int rados_striper_aio_write(Pointer ioctx, String oid, Pointer completion, byte[] buffer, int length, long offset);
+
+    int rados_striper_aio_append(Pointer ioctx, String oid, Pointer completion, byte[] buffer, int length);
+
+    int rados_striper_aio_write_full(Pointer ioctx, String oid, Pointer completion, byte[] buffer, int length);
+
+    int rados_striper_aio_read(Pointer ioctx, String oid, Pointer completion, byte[] buffer, int length, long offset);
+
+    int rados_striper_aio_remove(Pointer ioctx, String oid, Pointer completion);
+
+    void rados_striper_aio_flush(Pointer ioctx);
+
+    int rados_striper_aio_stat(Pointer ioctx, String oid, Pointer completion, LongByReference size, LongByReference mtime);
 
 }

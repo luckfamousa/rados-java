@@ -23,6 +23,7 @@ import static com.ceph.radosstriper.Library.rados;
 import java.io.Closeable;
 import java.util.concurrent.Callable;
 
+import com.ceph.rados.Completion;
 import com.ceph.rados.RadosBase;
 import com.ceph.rados.exceptions.RadosException;
 import com.ceph.rados.jna.RadosObjectInfo;
@@ -137,7 +138,7 @@ public class IoCTXStriper extends RadosBase implements AutoCloseable {
         return handleReturnCode(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
-                return rados.rados_set_object_layout_stripe_unit(getPointer(), stripeUnit);
+                return rados.rados_striper_set_object_layout_stripe_unit(getPointer(), stripeUnit);
             }
         }, "Failed to set stripe unit to: %s", stripeUnit);
     }
@@ -154,7 +155,7 @@ public class IoCTXStriper extends RadosBase implements AutoCloseable {
         return handleReturnCode(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
-                return rados.rados_set_object_layout_stripe_count(getPointer(), stripeCount);
+                return rados.rados_striper_set_object_layout_stripe_count(getPointer(), stripeCount);
             }
         }, "Failed to set stripe count to: %s", stripeCount);
     }
@@ -171,7 +172,7 @@ public class IoCTXStriper extends RadosBase implements AutoCloseable {
         return handleReturnCode(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
-                return rados.rados_set_object_layout_object_size(getPointer(), stripeObjectSize);
+                return rados.rados_striper_set_object_layout_object_size(getPointer(), stripeObjectSize);
             }
         }, "Failed to set stripe object size to: %s", stripeObjectSize);
     }
@@ -428,5 +429,90 @@ public class IoCTXStriper extends RadosBase implements AutoCloseable {
     @Override
     public void close() throws Exception {
         rados.rados_striper_destroy(getPointer());
+    }
+
+    // AIO
+
+    /**
+     * Asynchronously write to an object
+     *
+     * @param oid
+     *          The object to write to
+     * @param completion
+     *          The completion instructions
+     * @param buf
+     *          The content to write
+     * @param offset
+     *          The offset when writing
+     * @throws RadosException
+     */
+    public void aioWrite(final String oid, final Completion completion, final byte[] buf, final long offset) throws RadosException, IllegalArgumentException {
+        if (offset < 0) {
+            throw new IllegalArgumentException("Offset shouldn't be a negative value");
+        }
+        handleReturnCode(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return com.ceph.radosstriper.Library.rados.rados_striper_aio_write(getPointer(), oid, completion.getPointer(), buf, buf.length, offset);
+            }
+        }, "Failed AIO writing %s bytes with offset %s to %s", buf.length, offset, oid);
+    }
+
+    /**
+     * Asynchronously write to an object without an offset.
+     *
+     * @param oid
+     *          The object to write to
+     * @param completion
+     *          The completion instructions
+     * @param buf
+     *          The content to write
+     * @throws RadosException
+     */
+    public void aioWriteFull(final String oid, final Completion completion, final byte[] buf) throws RadosException, IllegalArgumentException {
+        handleReturnCode(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return com.ceph.radosstriper.Library.rados.rados_striper_aio_write_full(getPointer(), oid, completion.getPointer(), buf, buf.length);
+            }
+        }, "Failed AIO writing %s bytes without offset to %s", buf.length, oid);
+    }
+
+    /**
+     * Asynchronously append to an object.
+     *
+     * @param oid
+     *          The object to write to
+     * @param completion
+     *          The completion instructions
+     * @param buf
+     *          The content to append
+     * @throws RadosException
+     */
+    public void aioAppend(final String oid, final Completion completion, final byte[] buf) throws RadosException, IllegalArgumentException {
+        handleReturnCode(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return com.ceph.radosstriper.Library.rados.rados_striper_aio_append(getPointer(), oid, completion.getPointer(), buf, buf.length);
+            }
+        }, "Failed AIO appending %s bytes to %s", buf.length, oid);
+    }
+
+    /**
+     * Asynchronously append to an object.
+     *
+     * @param oid
+     *          The object to write to
+     * @param completion
+     *          The completion instructions
+     * @throws RadosException
+     */
+    public void aioRemove(final String oid, final Completion completion) throws RadosException, IllegalArgumentException {
+        handleReturnCode(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return com.ceph.radosstriper.Library.rados.rados_striper_aio_remove(getPointer(), oid, completion.getPointer());
+            }
+        }, "Failed AIO removing object %s", oid);
     }
 }
