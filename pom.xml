@@ -108,4 +108,13 @@
 
     </dependencies>
 
+  <distributionManagement>
+    <!-- GitHub Packages  -->
+    <repository>
+      <id>github</id>
+      <name>GitHub luckfamousa Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/luckfamousa/rados-java</url>
+    </repository>
+  </distributionManagement>
+    
 </project>
