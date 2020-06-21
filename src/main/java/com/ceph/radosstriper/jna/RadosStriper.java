@@ -17,15 +17,17 @@
  */
 package com.ceph.radosstriper.jna;
 
+import com.sun.jna.Callback;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
+import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.LongByReference;
+import com.sun.jna.ptr.PointerByReference;
 
 public interface RadosStriper extends Library {
 
     RadosStriper INSTANCE = (RadosStriper) Native.loadLibrary("radosstriper", RadosStriper.class);
-
 
     int rados_striper_create(Pointer ioctx, Pointer striper);
 
@@ -73,4 +75,23 @@ public interface RadosStriper extends Library {
 
     int rados_striper_aio_stat(Pointer ioctx, String oid, Pointer completion, LongByReference size, LongByReference mtime);
 
+    // Extended attributes
+    /*
+    int rados_striper_getxattrs(Pointer ioctx, String oid, Pointer iterator);
+    int rados_striper_getxattrs_next(Pointer iterator, PointerByReference attr_name, PointerByReference attr_value, IntByReference len);
+    void rados_striper_getxattrs_end(Pointer iterator);
+    */
+    /*
+    int rados_striper_multi_aio_create_completion(void *cb_arg, rados_callback_t cb_complete, rados_callback_t cb_safe, rados_striper_multi_completion_t *pc);
+    void rados_striper_multi_aio_wait_for_complete(rados_striper_multi_completion_t c);
+    void rados_striper_multi_aio_wait_for_safe(rados_striper_multi_completion_t c);
+    int rados_striper_multi_aio_is_complete(rados_striper_multi_completion_t c);
+    int rados_striper_multi_aio_is_safe(rados_striper_multi_completion_t c);
+    void rados_striper_multi_aio_wait_for_complete_and_cb(rados_striper_multi_completion_t c);
+    void rados_striper_multi_aio_wait_for_safe_and_cb(rados_striper_multi_completion_t c);
+    int rados_striper_multi_aio_is_complete_and_cb(rados_striper_multi_completion_t c);
+    int rados_striper_multi_aio_is_safe_and_cb(rados_striper_multi_completion_t c);
+    int rados_striper_multi_aio_get_return_value(rados_striper_multi_completion_t c);
+    void rados_striper_multi_aio_release(rados_striper_multi_completion_t c);
+    */
 }
